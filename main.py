@@ -41,6 +41,7 @@ def analyze_sentiment(text):
         label = "neutral"
     return {"label": label, "score": round(score, 3)}
     
+"""
 @app.get("/sentiment")
 def sentiment():
     results = []
@@ -51,6 +52,7 @@ def sentiment():
             "sentiment": sentiment_result
         })
     return results
+"""
 
 @app.get("/sentiment/{symbol}")
 def company_sentiment(symbol: str):
