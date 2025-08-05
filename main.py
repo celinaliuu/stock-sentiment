@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from textblob import TextBlob
 import requests
 import os
@@ -65,6 +65,28 @@ def company_sentiment(symbol: str):
             "sentiment": sentiment,
         })
     return results
+
+@app.get("/trend/{symbol}")
+def get_trend(symbol: str):
+    
+    symbol = symbol.upper()
+    headlines = fetch_company_headlines(symbol)
+
+    if not headlines:
+        raise HTTPException(status_code=404, detail="Company not found")
+    
+    scores = []
+    for headline in headlines:
+        sentiment_result = analyze_sentiment(headline)
+        if "score" in sentiment_result:
+            scores.append(sentiment_result["score"])
+            
+    avg_sentiment = sum(scores) / len(scores)
+    return {
+        "symbol": symbol,
+        "average_sentiment": round(avg_sentiment, 3)
+    }
+
 
 @app.get("/health")
 def health_check():
