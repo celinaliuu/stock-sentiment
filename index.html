@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stock Sentiment Dashboard</title>
+    <style>
+        body {
+            font-family: "Poppins", sans-serif;
+            background: #fff7f0;
+            margin: 0;
+            padding: 20px;
+            color: #4a2c2a;
+        }
+        h1 {
+            text-align: center;
+            color: #ff6f61;
+            font-size: 2rem;
+        }
+        .description {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 20px;
+            font-size: 1rem;
+            color: #6e4b47;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: #fff0f5;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(255, 182, 193, 0.3);
+        }
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 5px;
+        }
+        input {
+            width: 60%;
+            border: 1px solid #f8c6c8;
+            border-radius: 8px;
+            background: #fffaf9;
+        }
+        button {
+            background: #ffb347;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #ffa26c;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .card {
+            background: #ffe4e1;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border: 1px solid #ffd1c1;
+        }
+        .trend {
+            background: #fff5e1;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: bold;
+            margin-top: 15px;
+            border: 1px solid #ffd6a5;
+        }
+
+
+
+
+    </style>
+</head>
+<body>
+    <h1>Stock Sentiment Dashboard</h1>
+    <p class="description">
+        Enter a stock ticker (like <strong>AAPL</strong> or <strong>TSLA</strong>) to see the latest financial headlines 
+        and their sentiment scores. Sentiment is measured from <em>negative</em> to <em>positive</em>, 
+        and we’ll also show you the average mood for the stock!
+    </p>
+
+    <div class="container">
+        <input type="text" id="symbolInput" placeholder="Enter Symbol (e.g., AAPL)">
+        <button onclick="getSentiment()">Get Sentiment</button>
+        <button onclick="getTrend()">Get Trend</button>
+
+        <div class="results">
+            <h2>Sentiment Results</h2>
+            <div id="sentimentResults"></div>
+        
+            <h2>Trend Results</h2>
+            <p style="font-size: 0.9rem; color: #6e4b47; margin-top: -8px;">
+                This shows the average sentiment score from recent headlines for this stock.
+            </p>
+            <div id="trendResult" class="trend"></div>
+        </div>
+        
+
+    </div>
+
+    <script>
+        const API_BASE_URL = "http://127.0.0.1:8000";
+
+        async function getSentiment() {
+            const symbol = document.getElementById("symbolInput").value.trim();
+            if (!symbol) return alert("Please enter a stock symbol.");
+
+            const response = await fetch(`${API_BASE_URL}/sentiment/${symbol}`);
+            const data = await response.json();
+
+            const resultsDiv = document.getElementById("sentimentResults");
+            resultsDiv.innerHTML = "";
+
+            data.forEach(item => {
+                const el = document.createElement("div");
+                el.className = "card";
+                el.innerHTML = `<strong>Headline:</strong> ${item.headline}<br>
+                                <strong>Sentiment:</strong> ${item.sentiment.label} 
+                                (Score: ${item.sentiment.score})`;
+                resultsDiv.appendChild(el);
+            });
+        }
+
+        async function getTrend() {
+            const symbol = document.getElementById("symbolInput").value.trim();
+            if (!symbol) return alert("Please enter a stock symbol.");
+
+            const response = await fetch(`${API_BASE_URL}/trend/${symbol}`);
+            const data = await response.json();
+
+            const trendDiv = document.getElementById("trendResult");
+            trendDiv.innerHTML = `Average Sentiment for ${data.symbol}: <span style="color: #e67a50;">${data.average_sentiment}</span>`;
+        }
+    </script>
+</body>
+</html>

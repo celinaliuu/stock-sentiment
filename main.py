@@ -12,6 +12,15 @@ API_KEY = os.getenv("FINNHUB_API_KEY")
 
 app = FastAPI()
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # For dev, you can specify specific domains later
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def fetch_company_headlines(symbol):
