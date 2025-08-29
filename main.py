@@ -4,6 +4,7 @@ import requests
 import os
 import datetime
 from dotenv import load_dotenv
+from apscheduler.schedulers.background import BackgroundScheduler
 
 load_dotenv()
 
@@ -96,8 +97,46 @@ def get_trend(symbol: str):
         "average_sentiment": round(avg_sentiment, 3)
     }
 
+tracked_symbols = ["AAPL", "TSLA", "MSFT"]
+cached_results = {}
+
+@app.post("/update-all")
+def update_all():
+    results = {}
+
+    for symbol in tracked_symbols:
+        headlines = fetch_company_headlines(symbol)
+        sentiments = []
+
+        for h in headlines:
+            sentiments.append(analyze_sentiment(h))
+
+        if sentiments:
+            avg_sentiment = round(
+                sum(s["score"] for s in sentiments) / len(sentiments), 3
+            )
+        else:
+            avg_sentiment = None
+
+        results[symbol] = {
+            "headlines": headlines,
+            "average_sentiment": avg_sentiment
+        }
+
+    global cached_results
+    cached_results = results
+    print("Cache updated at", datetime.datetime.now())
+
+
+@app.get("/update-all")
+def manual_update_all():
+    update_all()
+    return cached_results
 
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
 
+scheduler = BackgroundScheduler()
+scheduler.add_job(update_all, "interval", minutes=5)
+scheduler.start()
