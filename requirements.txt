@@ -1,0 +1,4 @@
+uvicorn
+textblob
+requests
+python-dotenv
