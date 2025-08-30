@@ -1,4 +1,7 @@
+fastapi
 uvicorn
 textblob
 requests
 python-dotenv
+pytest
+apscheduler
